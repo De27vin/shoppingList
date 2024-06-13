@@ -10,6 +10,16 @@ const itemsArray = [
 ];
 let currentId = 1;
 
+// Middleware
+router.use((req, res, next) => {
+    const token = req.headers['authorization'];
+    if (token === 'your-auth-token') {
+        next();
+    } else {
+        res.status(403).send("Unauthorized");
+    }
+});
+
 router.get("/", (request, response) => {
     response.json(itemsArray);
 });
