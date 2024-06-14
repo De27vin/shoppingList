@@ -18,6 +18,10 @@ app.get("/", (request, response) => {
 
 app.use(express.static(path.join(__dirname, "routes")));
 
+app.all("*", (request, response) => {
+    response.sendFile(__dirname + "/src/notFoundErr.html");
+});
+
 const port = 3000;
 app.listen(port, () => {
     console.log("Server läuft auf localhost:3000");

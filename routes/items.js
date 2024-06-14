@@ -8,21 +8,23 @@ router.use(bodyParser.urlencoded({ extended: true }));
 
 const itemsArray = [
 ];
-let currentId = 1;
 
 // Middleware
-router.use((req, res, next) => {
-    const token = req.headers['authorization'];
+router.use((request, response, next) => {
+    const token = request.headers['authorization'];
     if (token === 'your-auth-token') {
         next();
     } else {
-        res.status(403).send("Unauthorized");
+        response.status(403).send("Unauthorized");
     }
 });
 
 router.get("/", (request, response) => {
     response.json(itemsArray);
 });
+
+
+let currentId = 1;
 
 router.post("/", (request, response) => {
     const { itemName } = request.body;
