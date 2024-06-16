@@ -10,13 +10,17 @@ const itemsRoute = require("./routes/items");
 const authRoute = require("./routes/auth");
 
 app.use("/items", itemsRoute);
-app.use("/auth", authRoute);
+app.use("/", authRoute);
 
 app.get("/", (request, response) => {
-    response.sendFile(__dirname + "/src/index.html");
+    response.sendFile(__dirname + "/src/login.html");
 });
 
-app.use(express.static(path.join(__dirname, "routes")));
+app.get("/register", (request, response) => {
+    response.sendFile(__dirname + "/src/register.html");
+});
+
+app.use(express.static(path.join(__dirname, "src")));
 
 app.all("*", (request, response) => {
     response.sendFile(__dirname + "/src/notFoundErr.html");
