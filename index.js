@@ -20,6 +20,10 @@ app.get("/register", (request, response) => {
     response.sendFile(__dirname + "/src/register.html");
 });
 
+app.get("/list", (request, response) => {
+    response.sendFile(__dirname + "/src/list.html");
+});
+
 app.use(express.static(path.join(__dirname, "src")));
 
 app.all("*", (request, response) => {
