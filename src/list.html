@@ -154,6 +154,7 @@
       <form id="list-form" onsubmit="addItem(event)">
         <div class="user-box">
           <input type="text" id="item" required />
+          <input type="hidden" id="userID" value="currentUserID" />
           <label>Titel</label>
         </div>
         <h3><button type="submit">Hinzufügen</button></h3>
@@ -163,25 +164,46 @@
       <ul id="item-list"></ul>
     </div>
     <script>
-      function addItem(event) {
+      async function addItem(event) {
         event.preventDefault();
         const itemInput = document.getElementById("item");
+        const userIDInput = document.getElementById("userID");
         const itemText = itemInput.value;
+        const userID = userIDInput.value;
+
         if (itemText.trim() !== "") {
-          const ul = document.getElementById("item-list");
-          const li = document.createElement("li");
-          const textNode = document.createTextNode(itemText);
-          const trashIcon = document.createElement("a");
-          trashIcon.style.marginRight = "auto";
-          trashIcon.textContent = "🗑️";
-          trashIcon.style.cursor = "pointer";
-          trashIcon.onclick = function () {
-            ul.removeChild(li);
-          };
-          li.appendChild(textNode);
-          li.appendChild(trashIcon);
-          ul.appendChild(li);
-          itemInput.value = "";
+          try {
+            const response = await fetch("/items", {
+              method: "POST",
+              headers: {
+                "Content-Type": "application/json"
+              },
+              body: JSON.stringify({ itemName: itemText, userID })
+            });
+
+            if (response.ok) {
+              const newItem = await response.json();
+              const ul = document.getElementById("item-list");
+              const li = document.createElement("li");
+              const textNode = document.createTextNode(newItem.itemName);
+              const trashIcon = document.createElement("a");
+              trashIcon.style.marginRight = "auto";
+              trashIcon.textContent = "🗑️";
+              trashIcon.style.cursor = "pointer";
+              trashIcon.onclick = function () {
+                ul.removeChild(li);
+              };
+              li.appendChild(textNode);
+              li.appendChild(trashIcon);
+              ul.appendChild(li);
+              itemInput.value = "";
+            } else {
+              const error = await response.text();
+              alert(error);
+            }
+          } catch (error) {
+            alert("An error occurred: " + error.message);
+          }
         }
       }
     </script>

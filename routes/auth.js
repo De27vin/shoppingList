@@ -1,48 +1,44 @@
 const express = require("express");
 const router = express.Router();
 const bcrypt = require("bcrypt");
-
-const usersArray = [
-    {
-        "username": "guest",
-        "password": "guest"
-    }
-];
+const pool = require("../database");
 
 router.post("/register", async (request, response) => {
-    const usernameExists = usersArray.find(user => user.username === request.body.username);
-    if(usernameExists) {
-        response.status(400).send("Username has already been used!");
-    } else {
-        try {
-            const hashedPassword = await bcrypt.hash(request.body.password, 10);
-
-            const user = { username: request.body.username, password: hashedPassword }
-            usersArray.push(user);
-            response.status(201).send("User registered successfully!");
-        } catch {
-            response.status(500).send("Internal server error");
-        }
-    }
-});
-
-
-router.post("/login", async (request, response) => {
-    const user = usersArray.find(user => user.username === request.body.username);
-    if(user == null) {
-        return response.status(400).send("User doesn't exist!");
-    }
+    const { username, password } = request.body;
     try {
-        if(await bcrypt.compare(request.body.password, user.password)) {
-            response.send("Success!");
+        const conn = await pool.getConnection();
+        const [rows] = await conn.query("SELECT * FROM users WHERE name = ?", [username]);
+        if (rows.length > 0) {
+            response.status(400).send("Username has already been used!");
         } else {
-            response.send("Not allowed");
+            const hashedPassword = await bcrypt.hash(password, 10);
+            await conn.query("INSERT INTO users (name, password) VALUES (?, ?)", [username, hashedPassword]);
+            response.status(201).send("User registered successfully!");
         }
-    } catch {
+        conn.release();
+    } catch (error) {
         response.status(500).send("Internal server error");
     }
 });
 
-
+router.post("/login", async (request, response) => {
+    const { username, password } = request.body;
+    try {
+        const conn = await pool.getConnection();
+        const [rows] = await conn.query("SELECT * FROM users WHERE name = ?", [username]);
+        if (rows.length === 0) {
+            return response.status(400).send("User doesn't exist!");
+        }
+        const user = rows[0];
+        if (await bcrypt.compare(password, user.password)) {
+            response.send("Success!");
+        } else {
+            response.send("Not allowed");
+        }
+        conn.release();
+    } catch (error) {
+        response.status(500).send("Internal server error");
+    }
+});
 
 module.exports = router;

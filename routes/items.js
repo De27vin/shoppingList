@@ -1,45 +1,43 @@
 const express = require("express");
-const bodyParser = require("body-parser"); 
-const router = express.Router(); // Do not change "R" to "r" (of "...Router...")
+const bodyParser = require("body-parser");
+const router = express.Router();
+const pool = require("../database");
 
 router.use(express.json());
 router.use(bodyParser.json());
 router.use(bodyParser.urlencoded({ extended: true }));
 
-const itemsArray = [
-];
-
-// Middleware
-router.use((request, response, next) => {
-    const token = request.headers['authorization'];
-    if (token === 'your-auth-token') {
-        next();
-    } else {
-        response.status(403).send("Unauthorized");
+router.get("/", async (request, response) => {
+    try {
+        const conn = await pool.getConnection();
+        const [rows] = await conn.query("SELECT * FROM list_entry");
+        response.json(rows);
+        conn.release();
+    } catch (error) {
+        response.status(500).send("Internal server error");
     }
 });
 
-router.get("/", (request, response) => {
-    response.json(itemsArray);
-});
+router.post("/", async (request, response) => {
+    const { itemName, userID } = request.body;
 
-
-let currentId = 1;
-
-router.post("/", (request, response) => {
-    const { itemName } = request.body;
-
-    if(!itemName) {
-        return response.status(400).send("Item name is required!");
+    if (!itemName || !userID) {
+        return response.status(400).send("Item name and user ID are required!");
     }
 
-    const newItem = {
-        id: currentId++,
-        itemName: itemName
-    };
-
-    itemsArray.push(newItem);
-    response.sendStatus(201).json(newItem);
+    try {
+        const conn = await pool.getConnection();
+        const result = await conn.query("INSERT INTO list_entry (item, userIDFK) VALUES (?, ?)", [itemName, userID]);
+        const newItem = {
+            id: result.insertId,
+            itemName,
+            userID
+        };
+        response.status(201).json(newItem);
+        conn.release();
+    } catch (error) {
+        response.status(500).send("Internal server error");
+    }
 });
 
 module.exports = router;
