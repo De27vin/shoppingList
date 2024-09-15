@@ -75,6 +75,12 @@ Make sure you have Node.js and npm:
    npm i bcrypt
    ```
 
+7. Install MariaDB:
+
+   ```bash
+   npm i mariadb
+   ```
+
 ### Starting the server:
 
 ```bash
