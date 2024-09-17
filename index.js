@@ -27,6 +27,7 @@ app.get("/list", (request, response) => {
 app.use(express.static(path.join(__dirname, "src")));
 
 app.all("*", (request, response) => {
+    response.status(404);
     response.sendFile(__dirname + "/src/notFoundErr.html");
 });
 
