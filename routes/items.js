@@ -1,7 +1,6 @@
 const express = require("express");
 const bodyParser = require("body-parser");
 const router = express.Router();
-const pool = require("../database");
 
 router.use(express.json());
 router.use(bodyParser.json());
