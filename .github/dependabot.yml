@@ -3,14 +3,18 @@ updates:
   - package-ecosystem: "npm"
     directory: "/"
     schedule:
-      interval: "weekly"
-    open-pull-requests-limit: 10
-    allow:
-      - dependency-type: "all"
+      interval: "daily"
+    open-pull-requests-limit: 1
+    groups:
+      all-root:
+        patterns:
+          - "*"
   - package-ecosystem: "npm"
     directory: "/frontend"
     schedule:
-      interval: "weekly"
-    open-pull-requests-limit: 10
-    allow:
-      - dependency-type: "all"
+      interval: "daily"
+    open-pull-requests-limit: 1
+    groups:
+      all-frontend:
+        patterns:
+          - "*"
